@@ -10,4 +10,16 @@ export default [
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
   eslintPluginPrettierRecommended,
+  {
+    rules: {
+      'prettier/prettier': ['error', { printWidth: 160 }],
+      'max-len': [0, 160, 2, { ignoreUrls: true }],
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: ['.*'],
+        },
+      ],
+    },
+  },
 ]
