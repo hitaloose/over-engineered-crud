@@ -1,17 +1,10 @@
 import { User } from '@/domain/entities/user'
+import { GenericUsecase } from '@/domain/usecases/generic-usecase'
 
-export type RegisterUserInput = {
-  name: string
-  username: string
-  email: string
-  password: string
-  passwordConfirmation: string
-}
+export type RegisterUserUsecase = GenericUsecase<RegisterUserUsecase.Input, RegisterUserUsecase.Output>
 
-export type RegisterUserOutput = {
-  user: User
-}
+export namespace RegisterUserUsecase {
+  export type Input = Omit<User, 'id' | 'hashedPassword'> & { password: string; passwordConfirmation: string }
 
-export interface RegisterUserUsecase {
-  run(input: RegisterUserInput): Promise<RegisterUserOutput>
+  export type Output = { user: User }
 }
