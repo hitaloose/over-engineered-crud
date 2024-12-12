@@ -1,6 +1,6 @@
-import { Hasher } from '@/application/cryptography/hasher'
-import { UserFinderByNameUsernameOrEmail } from '@/application/repositories/user-finder-by-name-username-or-email'
-import { UserInserterRepository } from '@/application/repositories/user-inserter-repository'
+import { Hasher } from '@/application/contracts/cryptography/hasher'
+import { UserFinderByNameUsernameOrEmail } from '@/application/contracts/repositories/user-finder-by-name-username-or-email'
+import { UserInserterRepository } from '@/application/contracts/repositories/user-inserter-repository'
 import { DomainError } from '@/domain/errors/domain-error'
 import { RegisterUserUsecase } from '@/domain/usecases/register-user-usecase'
 
