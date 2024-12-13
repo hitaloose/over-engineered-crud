@@ -1,11 +1,11 @@
 import { faker } from '@faker-js/faker'
 import { describe, expect, it, vitest } from 'vitest'
 
-import { HasherMock } from '@/application/mocks/hasher.mock'
-import { UserRepositoryMock } from '@/application/mocks/user-repository.mock'
 import { RegisterUserUsecaseImpl } from '@/application/usecases/register-user-usecase-impl'
 import { mockUser } from '@/domain/mocks/user.mock'
 import { RegisterUserUsecase } from '@/domain/usecases/register-user-usecase'
+import { HasherMock } from '@/infra/mocks/hasher.mock'
+import { UserRepositoryMock } from '@/infra/mocks/user-repository.mock'
 
 const makeSut = () => {
   const mockedHasher = new HasherMock()
