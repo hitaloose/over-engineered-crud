@@ -6,15 +6,22 @@
   "description": "",
   "author": "hitaloose",
   "scripts": {
-    "start": "tsx src/main/index.ts",
-    "dev": "tsx watch src/main/index.ts",
+    "start": "ts-node-dev src/main/index.ts",
+    "dev": "ts-node-dev --respawn --transpile-only src/main/index.ts",
+    "clean": "rm ./dist -rf",
+    "build": "npm run clean & tsc -p tsconfig-build.json",
     "test": "vitest",
     "lint": "eslint \"src/**/*.ts\"",
     "format": "npm run lint -- --fix",
     "prepare": "husky"
   },
   "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
     "express": "^4.21.2",
+    "module-alias": "^2.2.3",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^0.3.20",
     "zod": "^3.24.1"
   },
   "devDependencies": {
@@ -23,7 +30,10 @@
     "@eslint/js": "^9.16.0",
     "@faker-js/faker": "^9.3.0",
     "@ianvs/prettier-plugin-sort-imports": "^4.4.0",
+    "@types/bcrypt": "^5.0.2",
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
+    "@types/module-alias": "^2.0.4",
     "@types/node": "^22.10.1",
     "@typescript-eslint/eslint-plugin": "^8.18.0",
     "@typescript-eslint/parser": "^8.18.0",
@@ -33,7 +43,8 @@
     "globals": "^15.13.0",
     "husky": "^9.1.7",
     "prettier": "3.4.2",
-    "tsx": "^4.19.2",
+    "sqlite3": "^5.1.7",
+    "ts-node-dev": "^2.0.0",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.18.0",
     "vitest": "^2.1.8"
