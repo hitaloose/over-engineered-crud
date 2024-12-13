@@ -1,115 +1,174 @@
-# Over-Engineered CRUD (in progress)
+# Over-Engineered CRUD
 
-A TypeScript project showcasing a robust architecture for user registration with features like domain-driven design, clean architecture, and test-driven development. Designed for scalability and maintainability, this project uses tools and best practices to deliver an over-engineered CRUD solution.
-
----
+Welcome to the **Over-Engineered CRUD** project! This repository contains a robust and modular implementation of a CRUD system built with a focus on scalability, maintainability, and best practices in software development. The project leverages TypeScript, Express, TypeORM, Zod, and other modern tools.
 
 ## Table of Contents
-- [Overview](#overview)
-- [Features](#features)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-- [Scripts](#scripts)
-- [Technologies Used](#technologies-used)
-- [Development Practices](#development-practices)
-- [License](#license)
 
----
-
-## Overview
-This project implements a user registration use case with:
-- Input validation for passwords and existing users.
-- Separation of concerns using clean architecture principles.
-- Mock repositories for easy testing.
-
-The primary goal is to provide a reference for building highly structured and maintainable applications using TypeScript.
+1. [Features](#features)
+2. [Technologies](#technologies)
+3. [Project Structure](#project-structure)
+4. [Setup Instructions](#setup-instructions)
+5. [Scripts](#scripts)
+6. [Usage](#usage)
+7. [Testing](#testing)
+8. [Contributing](#contributing)
+9. [License](#license)
 
 ---
 
 ## Features
-- **Domain-Driven Design**: Clear separation of domain logic, use cases, and infrastructure.
-- **Test-Driven Development**: Comprehensive unit tests using Vitest.
-- **Static Analysis**: Enforced through ESLint and Prettier.
-- **Modern Build Tools**: Leveraging Vite for configuration.
+
+- **Authentication**: Basic user registration with validation and password hashing.
+- **Modularity**: Clear separation of concerns across different layers (domain, application, presentation, infra).
+- **Validation**: Powered by Zod to ensure robust input validation.
+- **Database Management**: Uses SQLite with TypeORM for ORM capabilities.
+- **Error Handling**: Comprehensive error handling for a seamless user experience.
+- **Code Quality**: Pre-configured ESLint and Prettier for consistent code styling and formatting.
+
+---
+
+## Technologies
+
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Framework**: [Express.js](https://expressjs.com/)
+- **ORM**: [TypeORM](https://typeorm.io/)
+- **Validation**: [Zod](https://zod.dev/)
+- **Testing**: [Vitest](https://vitest.dev/)
+- **Cryptography**: [Bcrypt](https://www.npmjs.com/package/bcrypt)
 
 ---
 
 ## Project Structure
+
+```plaintext
+src/
+├── application/        # Application-level use cases and mocks
+├── domain/             # Domain entities, contracts, and business logic
+├── infra/              # Infrastructure implementations (database, validators, cryptography)
+├── main/               # Entry point, factories, and setup
+├── presentation/       # Controllers, adapters, and decorators
 ```
-├── src/
-│   ├── main/                # Application entry point
-│   │   └── index.ts         # Initializer
-│   ├── application/         # Application-specific logic
-│   │   ├── cryptography/    # Cryptographic utilities
-│   │   ├── mocks/           # Mock implementations for testing
-│   │   ├── repositories/    # Interfaces for data persistence
-│   │   └── usecases/        # Application use cases
-│   ├── domain/              # Core business logic
-│   │   ├── entities/        # Domain entities
-│   │   ├── errors/          # Domain-specific errors
-│   │   └── usecases/        # Domain use case interfaces
-├── tests/                   # Integration tests
-├── commitlint.config.mjs    # Commit linting rules
-├── eslint.config.mjs        # ESLint configuration
-├── tsconfig.json            # TypeScript configuration
-├── vite.config.ts           # Vite configuration
-└── package.json             # Dependencies and scripts
-```
+
+Key Configuration Files:
+- **`tsconfig.json`**: TypeScript compiler configuration.
+- **`eslint.config.mjs`**: ESLint rules for consistent coding style.
+- **`vite.config.ts`**: Vite configuration for tests.
+- **`commitlint.config.mjs`**: Commit linting configuration for conventional commits.
 
 ---
 
-## Getting Started
+## Setup Instructions
+
 ### Prerequisites
-Ensure you have the following installed:
-- [Node.js](https://nodejs.org/) (v18 or later)
-- [npm](https://www.npmjs.com/) (v9 or later)
+
+- [Node.js](https://nodejs.org/) >= 18.x
+- [npm](https://www.npmjs.com/) or [Yarn](https://yarnpkg.com/)
+- [SQLite](https://www.sqlite.org/)
 
 ### Installation
+
 1. Clone the repository:
    ```bash
    git clone https://github.com/hitaloose/over-engineered-crud.git
    cd over-engineered-crud
    ```
+
 2. Install dependencies:
    ```bash
    npm install
    ```
 
-### Running the Project
-Start the application in development mode:
-```bash
-npm run dev
-```
+3. Prepare Husky hooks:
+   ```bash
+   npm run prepare
+   ```
 
 ---
 
 ## Scripts
-| Command          | Description                                       |
-|------------------|---------------------------------------------------|
-| `npm run start`  | Run the project in production mode.              |
-| `npm run dev`    | Run the project in development mode.             |
-| `npm run test`   | Run unit tests with Vitest.                      |
-| `npm run lint`   | Analyze code quality with ESLint.                |
-| `npm run format` | Automatically fix lint issues.                   |
-| `npm run prepare`| Setup Git hooks using Husky.                     |
+
+Here are the available npm scripts:
+
+| Script            | Description                                           |
+|-------------------|-------------------------------------------------------|
+| `npm run start`   | Starts the application.                               |
+| `npm run dev`     | Starts the app in development mode with hot reload.   |
+| `npm run clean`   | Cleans the `dist` directory.                          |
+| `npm run build`   | Compiles TypeScript to JavaScript.                    |
+| `npm run test`    | Runs tests using Vitest.                              |
+| `npm run lint`    | Runs ESLint to check for coding standard violations.  |
+| `npm run format`  | Formats code using Prettier.                          |
 
 ---
 
-## Technologies Used
-- **Core**: [TypeScript](https://www.typescriptlang.org/), [Express](https://expressjs.com/)
-- **Testing**: [Vitest](https://vitest.dev/), [@faker-js/faker](https://fakerjs.dev/)
-- **Linting & Formatting**: [ESLint](https://eslint.org/), [Prettier](https://prettier.io/)
-- **Build Tools**: [Vite](https://vitejs.dev/)
-- **Utilities**: [Husky](https://typicode.github.io/husky/), [TSX](https://github.com/esbuild-kit/tsx)
+## Usage
+
+### Starting the Application
+
+Run the development server:
+
+```bash
+npm run dev
+```
+
+The server will start on [http://localhost:3333](http://localhost:3333).
+
+### API Endpoints
+
+#### Register a User
+
+- **POST** `/auth/register`
+- **Body**:
+  ```json
+  {
+    "name": "John Doe",
+    "username": "johndoe",
+    "email": "john@example.com",
+    "password": "password123",
+    "passwordConfirmation": "password123"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "id": "uuid",
+    "name": "John Doe",
+    "username": "johndoe",
+    "email": "john@example.com"
+  }
+  ```
 
 ---
 
-## Development Practices
-- **Commit Linting**: Enforced with `@commitlint/config-conventional`.
-- **Import Sorting**: Managed with `@ianvs/prettier-plugin-sort-imports`.
-- **Coding Standards**: Enforced with TypeScript and ESLint configurations.
+## Testing
+
+Run the unit tests:
+
+```bash
+npm run test
+```
+
+### Key Testing Tools:
+- **Vitest**: For unit and integration testing.
+- **Faker.js**: For generating mock data in tests.
+
+---
+
+## Contributing
+
+We welcome contributions to improve this project. Please follow the steps below:
+
+1. Fork this repository.
+2. Create a feature branch: `git checkout -b feature-name`.
+3. Commit your changes using [Conventional Commits](https://www.conventionalcommits.org/).
+4. Push to your fork and submit a pull request.
 
 ---
 
 ## License
+
 This project is licensed under the [MIT License](LICENSE).
+
+---
+
+Feel free to explore and contribute to **Over-Engineered CRUD**! 🎉
