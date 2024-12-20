@@ -1,3 +1,4 @@
+import { Encoder } from '@/application/contracts/cryptography/encoder'
 import { Hasher } from '@/application/contracts/cryptography/hasher'
 import { UserFinderByNameUsernameOrEmail } from '@/application/contracts/repositories/user-finder-by-name-username-or-email'
 import { UserInserterRepository } from '@/application/contracts/repositories/user-inserter-repository'
@@ -7,6 +8,7 @@ import { RegisterUserUsecase } from '@/domain/usecases/register-user-usecase'
 export class RegisterUserUsecaseImpl implements RegisterUserUsecase {
   constructor(
     private readonly hasher: Hasher,
+    private readonly encoder: Encoder,
     private readonly userFinderByNameUsernameOrEmail: UserFinderByNameUsernameOrEmail,
     private readonly userInserterRepository: UserInserterRepository
   ) {}
@@ -25,6 +27,8 @@ export class RegisterUserUsecaseImpl implements RegisterUserUsecase {
 
     const user = await this.userInserterRepository.insert({ ...input, hashedPassword })
 
-    return { user }
+    const token = await this.encoder.encode({ sub: user.id })
+
+    return { user, token }
   }
 }

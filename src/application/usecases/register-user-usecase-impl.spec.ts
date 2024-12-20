@@ -4,18 +4,20 @@ import { describe, expect, it, vitest } from 'vitest'
 import { RegisterUserUsecaseImpl } from '@/application/usecases/register-user-usecase-impl'
 import { mockUser } from '@/domain/mocks/user.mock'
 import { RegisterUserUsecase } from '@/domain/usecases/register-user-usecase'
+import { EncoderMock } from '@/infra/mocks/encoder.mock'
 import { HasherMock } from '@/infra/mocks/hasher.mock'
 import { UserRepositoryMock } from '@/infra/mocks/user-repository.mock'
 
 const makeSut = () => {
   const mockedHasher = new HasherMock()
+  const mockedEncoder = new EncoderMock()
   const mockedUserRepository = new UserRepositoryMock()
 
   vitest.spyOn(mockedUserRepository, 'findByNameUsernameOrEmail').mockResolvedValue(undefined)
 
-  const sut = new RegisterUserUsecaseImpl(mockedHasher, mockedUserRepository, mockedUserRepository)
+  const sut = new RegisterUserUsecaseImpl(mockedHasher, mockedEncoder, mockedUserRepository, mockedUserRepository)
 
-  return { sut, mockedHasher, mockedUserRepository }
+  return { sut, mockedHasher, mockedUserRepository, mockedEncoder }
 }
 
 const makeInput = (override?: Partial<RegisterUserUsecase.Input>): RegisterUserUsecase.Input => {
@@ -92,5 +94,6 @@ describe('RegisterUserUsecaseImpl', () => {
     const output = await sut.run(makeInput())
 
     expect(output.user).toBeTruthy()
+    expect(output.token).toBeTruthy()
   })
 })

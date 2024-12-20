@@ -18,7 +18,7 @@ export default [
       'no-restricted-imports': [
         'error',
         {
-          patterns: ['.*'],
+          patterns: ['.*', '!./'],
         },
       ],
     },

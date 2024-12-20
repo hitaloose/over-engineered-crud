@@ -11,6 +11,7 @@
     "clean": "rm ./dist -rf",
     "build": "npm run clean & tsc -p tsconfig-build.json",
     "test": "vitest",
+    "test:commit": "vitest run",
     "lint": "eslint \"src/**/*.ts\"",
     "format": "npm run lint -- --fix",
     "prepare": "husky"
@@ -18,7 +19,9 @@
   "dependencies": {
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
     "module-alias": "^2.2.3",
     "reflect-metadata": "^0.2.2",
     "typeorm": "^0.3.20",
@@ -33,6 +36,7 @@
     "@types/bcrypt": "^5.0.2",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/module-alias": "^2.0.4",
     "@types/node": "^22.10.1",
     "@typescript-eslint/eslint-plugin": "^8.18.0",

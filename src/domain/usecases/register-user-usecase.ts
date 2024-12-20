@@ -7,5 +7,5 @@ export type RegisterUserUsecase = Usecase<RegisterUserUsecase.Input, RegisterUse
 export namespace RegisterUserUsecase {
   export type Input = Omit<User, keyof BaseEntity | 'hashedPassword'> & { password: string; passwordConfirmation: string }
 
-  export type Output = { user: User }
+  export type Output = { user: User; token: string }
 }
