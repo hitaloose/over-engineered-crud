@@ -2,7 +2,7 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
 
 import { User } from '@/domain/entities/user'
 
-@Entity()
+@Entity({ name: 'user' })
 export class UserTypeorm implements User {
   @PrimaryGeneratedColumn()
   id!: string
