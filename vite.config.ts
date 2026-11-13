@@ -8,4 +8,13 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  test: {
+    env: {
+      NODE_ENV: 'test',
+      API_PORT: '0',
+      BCRYPT_SALTS: '1',
+      JWT_SECRET: 'test-secret',
+      MCP_ENABLED: 'true',
+    },
+  },
 })

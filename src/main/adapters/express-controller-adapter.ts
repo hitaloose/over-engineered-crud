@@ -7,7 +7,17 @@ export const expressControllerAdapter = (controller: Controller) => {
   const decoratedController = new ControllerErrorHandlerDecorator(controller)
 
   return async (request: Request, response: Response) => {
-    const { statusCode, body } = await decoratedController.handle({ body: request.body || {} })
+    const { statusCode, body } = await decoratedController.handle({
+      body: request.body || {},
+      params: request.params,
+      query: request.query as Record<string, unknown>,
+      auth: response.locals.auth,
+    })
+
+    if (body === undefined) {
+      response.status(statusCode).end()
+      return
+    }
 
     response.status(statusCode).json(body)
   }

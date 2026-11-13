@@ -1,5 +1,5 @@
 import { Validator } from '@/domain/contracts/validator'
-import { RegisterUserUsecase } from '@/domain/usecases/register-user-usecase'
+import { RegisterUserUsecase } from '@/domain/usecases/auth/register-user-usecase'
 import { Controller } from '@/presentation/contracts/controller'
 import { replyCreated } from '@/presentation/helpers/http'
 

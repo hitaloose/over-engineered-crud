@@ -2,10 +2,10 @@ import { faker } from '@faker-js/faker'
 import { describe, expect, it, vitest } from 'vitest'
 
 import { RegisterUserUsecaseMock } from '@/application/mocks/register-user-usecase.mock'
-import { RegisterUserUsecase } from '@/domain/usecases/register-user-usecase'
+import { RegisterUserUsecase } from '@/domain/usecases/auth/register-user-usecase'
 import { ZodValidatorMock } from '@/infra/mocks/zod-validator.mock'
 import { Controller } from '@/presentation/contracts/controller'
-import { RegisterUserController } from '@/presentation/controllers/register-user-controller'
+import { RegisterUserController } from '@/presentation/controllers/auth/register-user-controller'
 
 const makeSut = () => {
   const mockedBodyValidator = new ZodValidatorMock<RegisterUserUsecase.Input>()

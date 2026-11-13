@@ -8,5 +8,7 @@ export const mockUser = (override?: Partial<User>): User => ({
   email: faker.internet.email(),
   hashedPassword: faker.string.uuid(),
   username: faker.internet.username(),
+  createdAt: faker.date.past(),
+  updatedAt: faker.date.recent(),
   ...override,
 })

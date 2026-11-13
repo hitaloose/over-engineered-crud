@@ -1,32 +1,20 @@
-import { ZodSchema } from 'zod'
+import { ZodType, ZodTypeDef } from 'zod'
 
 import { Validator } from '@/domain/contracts/validator'
 import { ZodValidatorError } from '@/infra/errors/zod-validator-error'
 
 export class ZodValidator<T> implements Validator<T> {
-  constructor(private readonly schema: ZodSchema<T>) {}
+  constructor(private readonly schema: ZodType<T, ZodTypeDef, unknown>) {}
 
   async run(values: unknown): Promise<T> {
-    const { success, data, error } = this.schema.safeParse(values)
+    const result = this.schema.safeParse(values)
 
-    if (!success) {
-      const details: Record<string, string[]> = {}
+    if (!result.success) {
+      const { fieldErrors } = result.error.flatten()
 
-      Object.entries(error.format()).forEach(([key, value]) => {
-        if (Array.isArray(value)) {
-          return
-        }
-
-        if (key === '_errors') {
-          return
-        }
-
-        details[key] = value?._errors || []
-      })
-
-      throw new ZodValidatorError(details)
+      throw new ZodValidatorError(fieldErrors as Record<string, string[]>)
     }
 
-    return data
+    return result.data
   }
 }

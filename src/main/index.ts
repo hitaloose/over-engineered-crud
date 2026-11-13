@@ -8,7 +8,7 @@ const main = async () => {
   await dataSource.initialize()
 
   server.listen(configs.API_PORT, () => {
-    console.log(`server running on ${configs.API_PORT}`)
+    console.log(`server running on ${configs.API_PORT}${configs.MCP_ENABLED ? ' (MCP at POST /mcp)' : ''}`)
   })
 }
 

@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run test:commit)",
+      "Bash(npm run test:commit:*)",
+      "Bash(npx vitest run:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run format)",
+      "Bash(npm run typecheck)",
+      "Bash(npm run build)"
+    ],
+    "deny": ["Read(./.env)"]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{ "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/eslint-fix.mjs\"" }]
+      }
+    ]
+  }
+}

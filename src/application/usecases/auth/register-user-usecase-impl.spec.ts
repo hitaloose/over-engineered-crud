@@ -1,9 +1,9 @@
 import { faker } from '@faker-js/faker'
 import { describe, expect, it, vitest } from 'vitest'
 
-import { RegisterUserUsecaseImpl } from '@/application/usecases/register-user-usecase-impl'
+import { RegisterUserUsecaseImpl } from '@/application/usecases/auth/register-user-usecase-impl'
 import { mockUser } from '@/domain/mocks/user.mock'
-import { RegisterUserUsecase } from '@/domain/usecases/register-user-usecase'
+import { RegisterUserUsecase } from '@/domain/usecases/auth/register-user-usecase'
 import { EncoderMock } from '@/infra/mocks/encoder.mock'
 import { HasherMock } from '@/infra/mocks/hasher.mock'
 import { UserRepositoryMock } from '@/infra/mocks/user-repository.mock'
@@ -13,7 +13,7 @@ const makeSut = () => {
   const mockedEncoder = new EncoderMock()
   const mockedUserRepository = new UserRepositoryMock()
 
-  vitest.spyOn(mockedUserRepository, 'findByNameUsernameOrEmail').mockResolvedValue(undefined)
+  vitest.spyOn(mockedUserRepository, 'findByUsernameOrEmail').mockResolvedValue(undefined)
 
   const sut = new RegisterUserUsecaseImpl(mockedHasher, mockedEncoder, mockedUserRepository, mockedUserRepository)
 
@@ -45,18 +45,18 @@ describe('RegisterUserUsecaseImpl', () => {
   it('should call user finder with correct values', async () => {
     const { sut, mockedUserRepository } = makeSut()
 
-    const spy = vitest.spyOn(mockedUserRepository, 'findByNameUsernameOrEmail')
+    const spy = vitest.spyOn(mockedUserRepository, 'findByUsernameOrEmail')
 
     const input = makeInput()
     await sut.run(input)
 
-    expect(spy).toHaveBeenLastCalledWith(input)
+    expect(spy).toHaveBeenLastCalledWith({ username: input.username, email: input.email })
   })
 
   it('should throw if user finder return an user', async () => {
     const { sut, mockedUserRepository } = makeSut()
 
-    vitest.spyOn(mockedUserRepository, 'findByNameUsernameOrEmail').mockResolvedValueOnce(mockUser())
+    vitest.spyOn(mockedUserRepository, 'findByUsernameOrEmail').mockResolvedValueOnce(mockUser())
 
     const promise = sut.run(makeInput())
 
@@ -85,7 +85,7 @@ describe('RegisterUserUsecaseImpl', () => {
     const input = makeInput()
     await sut.run(input)
 
-    expect(spy).toHaveBeenLastCalledWith({ ...input, hashedPassword })
+    expect(spy).toHaveBeenLastCalledWith({ name: input.name, username: input.username, email: input.email, hashedPassword })
   })
 
   it('should return an created user on success', async () => {
@@ -94,6 +94,7 @@ describe('RegisterUserUsecaseImpl', () => {
     const output = await sut.run(makeInput())
 
     expect(output.user).toBeTruthy()
+    expect(output.user).not.toHaveProperty('hashedPassword')
     expect(output.token).toBeTruthy()
   })
 })

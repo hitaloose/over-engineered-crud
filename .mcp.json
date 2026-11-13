@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "over-engineered-crud": {
+      "command": "npm",
+      "args": ["run", "--silent", "mcp:stdio"]
+    }
+  }
+}

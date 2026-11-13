@@ -1,21 +1,27 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 
 import { User } from '@/domain/entities/user'
 
 @Entity({ name: 'user' })
 export class UserTypeorm implements User {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id!: string
 
-  @Column()
+  @Column({ type: 'varchar' })
   name!: string
 
-  @Column()
+  @Column({ type: 'varchar', unique: true })
   username!: string
 
-  @Column()
+  @Column({ type: 'varchar', unique: true })
   email!: string
 
-  @Column()
+  @Column({ type: 'varchar' })
   hashedPassword!: string
+
+  @CreateDateColumn()
+  createdAt!: Date
+
+  @UpdateDateColumn()
+  updatedAt!: Date
 }

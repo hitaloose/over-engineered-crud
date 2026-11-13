@@ -1,33 +1,38 @@
 {
   "name": "over-engineered-crud",
   "version": "1.0.0",
-  "main": "index.js",
   "license": "MIT",
-  "description": "",
+  "description": "Clean Architecture CRUD (auth + tasks) in TypeScript, exposed both as a REST API and as an MCP server.",
   "author": "hitaloose",
   "scripts": {
     "start": "node dist/main/index.js",
     "dev:start": "ts-node-dev src/main/index.ts",
     "dev": "export NODE_ENV=development && ts-node-dev --respawn --transpile-only src/main/index.ts",
-    "clean": "rm ./dist -rf",
-    "build": "npm run clean & tsc -p tsconfig-build.json",
+    "clean": "rm -rf dist",
+    "build": "npm run clean && tsc -p tsconfig-build.json",
     "test": "vitest",
     "test:commit": "vitest run",
     "lint": "eslint \"src/**/*.ts\"",
     "format": "npm run lint -- --fix",
-    "prepare": "husky"
+    "prepare": "husky",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "mcp:stdio": "node -r ts-node/register/transpile-only src/main/mcp/stdio.ts",
+    "mcp:stdio:prod": "node dist/main/mcp/stdio.js",
+    "mcp:token": "node -r ts-node/register/transpile-only src/main/mcp/token.ts",
+    "mcp:inspect": "npx @modelcontextprotocol/inspector npm run --silent mcp:stdio"
   },
   "dependencies": {
-    "bcrypt": "^5.1.1",
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "jsonwebtoken": "^9.0.2",
+    "jsonwebtoken": "^9.0.3",
     "module-alias": "^2.2.3",
     "pg": "^8.13.1",
     "reflect-metadata": "^0.2.2",
-    "typeorm": "^0.3.20",
-    "zod": "^3.24.1"
+    "typeorm": "^0.3.31",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.6.0",
@@ -41,18 +46,23 @@
     "@types/jsonwebtoken": "^9.0.7",
     "@types/module-alias": "^2.0.4",
     "@types/node": "^22.10.1",
+    "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^8.18.0",
     "@typescript-eslint/parser": "^8.18.0",
+    "better-sqlite3": "^12.4.1",
     "eslint": "^9.16.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "globals": "^15.13.0",
     "husky": "^9.1.7",
     "prettier": "3.4.2",
-    "sqlite3": "^5.1.7",
+    "supertest": "^7.1.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.18.0",
     "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

@@ -6,3 +6,11 @@ export type User = BaseEntity & {
   email: string
   hashedPassword: string
 }
+
+export type PublicUser = Omit<User, 'hashedPassword'>
+
+export const toPublicUser = (user: User): PublicUser => {
+  const { id, name, username, email, createdAt, updatedAt } = user
+
+  return { id, name, username, email, createdAt, updatedAt }
+}

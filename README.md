@@ -1,174 +1,138 @@
 # Over-Engineered CRUD
 
-Welcome to the **Over-Engineered CRUD** project! This repository contains a robust and modular implementation of a CRUD system built with a focus on scalability, maintainability, and best practices in software development. The project leverages TypeScript, Express, TypeORM, Zod, and other modern tools.
+[![CI](https://github.com/hitaloose/over-engineered-crud/actions/workflows/ci.yml/badge.svg)](https://github.com/hitaloose/over-engineered-crud/actions/workflows/ci.yml)
 
-## Table of Contents
+A deliberately over-engineered **Auth + Tasks** CRUD in TypeScript, built with Clean Architecture. The point it proves: **the same controllers are served by a REST API and by an MCP server**, so an AI assistant (Claude Code, Claude Desktop, any MCP client) can manage your tasks without one line of business logic changing.
 
-1. [Features](#features)
-2. [Technologies](#technologies)
-3. [Project Structure](#project-structure)
-4. [Setup Instructions](#setup-instructions)
-5. [Scripts](#scripts)
-6. [Usage](#usage)
-7. [Testing](#testing)
-8. [Contributing](#contributing)
-9. [License](#license)
+## Architecture
 
----
+```mermaid
+flowchart LR
+  subgraph main["main (composition root)"]
+    EA[express-controller-adapter]
+    MA[mcp-tool-adapter]
+  end
+  HTTP[REST client] --> EA
+  AI[MCP client<br/>Claude Code / Desktop] -->|stdio or Streamable HTTP| MA
+  EA --> C
+  MA --> C
+  subgraph presentation
+    C[Controllers + AuthMiddleware]
+  end
+  C --> U
+  subgraph application
+    U[Usecase implementations]
+  end
+  U --> D[domain<br/>entities, usecase types, errors]
+  U -.ports.-> I
+  subgraph infra
+    I[TypeORM · zod · bcrypt · jwt]
+  end
+```
+
+| Layer          | Responsibility                                                                                               |
+| -------------- | ------------------------------------------------------------------------------------------------------------ |
+| `domain`       | Entities, usecase contracts (`Usecase<Input, Output>`), domain errors. No libraries.                         |
+| `application`  | Usecase implementations and the narrow ports they depend on (`TaskFinderByIdRepository`, `HashComparer`, …). |
+| `infra`        | TypeORM entities, migrations and repositories, zod schemas, bcrypt, JWT.                                     |
+| `presentation` | Framework-agnostic controllers, auth middleware, error-mapping decorator.                                    |
+| `main`         | Factories, configs and the **adapters** that plug controllers into Express and MCP.                          |
+
+`src/main/adapters/mcp-tool-adapter.ts` is the twin of `express-controller-adapter.ts`: it turns MCP tool arguments into a `Controller.Request`, runs the same decorated controller, and turns the `Controller.Response` into an MCP `CallToolResult` (`isError` for 4xx/5xx). Tool input schemas are the **same zod schemas** the REST API validates with.
 
 ## Features
 
-- **Authentication**: Basic user registration with validation and password hashing.
-- **Modularity**: Clear separation of concerns across different layers (domain, application, presentation, infra).
-- **Validation**: Powered by Zod to ensure robust input validation.
-- **Database Management**: Uses SQLite with TypeORM for ORM capabilities.
-- **Error Handling**: Comprehensive error handling for a seamless user experience.
-- **Code Quality**: Pre-configured ESLint and Prettier for consistent code styling and formatting.
+- Register, login and `GET /auth/me` with bcrypt + JWT
+- Tasks CRUD scoped to the authenticated user, with status filter and pagination
+- MCP server with 7 tools, over **stdio** (local) and **Streamable HTTP** (`POST /mcp`, same bearer auth as the API)
+- Migrations that run on Postgres (dev/prod) and in-memory SQLite (tests)
+- Unit tests for every usecase plus HTTP and MCP integration tests
+- AI-assisted development setup: `CLAUDE.md`, a project skill, hooks, `.mcp.json`, and Claude PR review in CI
 
----
+## Getting started
 
-## Technologies
+Requires Node.js ≥ 20 and Docker.
 
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Framework**: [Express.js](https://expressjs.com/)
-- **ORM**: [TypeORM](https://typeorm.io/)
-- **Validation**: [Zod](https://zod.dev/)
-- **Testing**: [Vitest](https://vitest.dev/)
-- **Cryptography**: [Bcrypt](https://www.npmjs.com/package/bcrypt)
-
----
-
-## Project Structure
-
-```plaintext
-src/
-├── application/        # Application-level use cases and mocks
-├── domain/             # Domain entities, contracts, and business logic
-├── infra/              # Infrastructure implementations (database, validators, cryptography)
-├── main/               # Entry point, factories, and setup
-├── presentation/       # Controllers, adapters, and decorators
+```bash
+cp .env.example .env        # set JWT_SECRET
+npm install
+docker compose up -d        # Postgres + API on $API_PORT (migrations run on boot)
 ```
 
-Key Configuration Files:
-- **`tsconfig.json`**: TypeScript compiler configuration.
-- **`eslint.config.mjs`**: ESLint rules for consistent coding style.
-- **`vite.config.ts`**: Vite configuration for tests.
-- **`commitlint.config.mjs`**: Commit linting configuration for conventional commits.
+For local development with reload: `docker compose up app_db -d && npm run dev`.
 
----
+## REST API
 
-## Setup Instructions
+| Method   | Path                            | Auth   | Description                                                 |
+| -------- | ------------------------------- | ------ | ----------------------------------------------------------- |
+| `GET`    | `/health`                       |        | Liveness check                                              |
+| `POST`   | `/auth/register`                |        | `{ name, username, email, password, passwordConfirmation }` |
+| `POST`   | `/auth/login`                   |        | `{ email, password }` → `{ user, token }`                   |
+| `GET`    | `/auth/me`                      | Bearer | Current user                                                |
+| `POST`   | `/tasks`                        | Bearer | `{ title, description?, status?, dueDate? }`                |
+| `GET`    | `/tasks?status=&page=&perPage=` | Bearer | Paginated list, newest first                                |
+| `GET`    | `/tasks/:taskId`                | Bearer | One task                                                    |
+| `PATCH`  | `/tasks/:taskId`                | Bearer | Partial update                                              |
+| `DELETE` | `/tasks/:taskId`                | Bearer | Delete (204)                                                |
 
-### Prerequisites
+Errors: `400` validation (with per-field `details`), `401` auth, `404` not found, `422` business rule.
 
-- [Node.js](https://nodejs.org/) >= 18.x
-- [npm](https://www.npmjs.com/) or [Yarn](https://yarnpkg.com/)
-- [SQLite](https://www.sqlite.org/)
+## MCP server
 
-### Installation
+| Tool            | Description                                                                           |
+| --------------- | ------------------------------------------------------------------------------------- |
+| `whoami`        | Authenticated user                                                                    |
+| `list_tasks`    | Filter by status, paginate                                                            |
+| `get_task`      | One task by id                                                                        |
+| `create_task`   | New task (status defaults to `todo`)                                                  |
+| `update_task`   | Partial update                                                                        |
+| `complete_task` | Shortcut for `status: done` (same controller as `update_task`, different args mapper) |
+| `delete_task`   | Permanent delete (annotated as destructive)                                           |
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/hitaloose/over-engineered-crud.git
-   cd over-engineered-crud
-   ```
+**Get a token** for an existing account:
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+```bash
+npm run mcp:token -- --email you@example.com --password '...'
+```
 
-3. Prepare Husky hooks:
-   ```bash
-   npm run prepare
-   ```
+**stdio (Claude Code)** — put the token in `.env` as `MCP_ACCESS_TOKEN`. The repo ships a `.mcp.json`, so opening the project in Claude Code offers the `over-engineered-crud` server. Or add it manually:
 
----
+```bash
+claude mcp add over-engineered-crud -- npm run --silent mcp:stdio
+```
+
+**Streamable HTTP** — with the API running:
+
+```bash
+claude mcp add --transport http over-engineered-crud http://localhost:3000/mcp \
+  --header "Authorization: Bearer <token>"
+```
+
+**Inspector**: `npm run mcp:inspect`.
+
+## Developing with AI
+
+- `CLAUDE.md` documents the layers, the dependency rule and conventions for coding agents.
+- `.claude/skills/new-usecase` scaffolds a feature end to end, including its HTTP route **and** MCP tool.
+- `.claude/settings.json` pre-approves the test/lint/build commands, blocks reading `.env`, and runs `eslint --fix` after every edit.
+- `.github/workflows/claude-review.yml` reviews every PR against `CLAUDE.md`; `claude.yml` answers `@claude` mentions. Both need an `ANTHROPIC_API_KEY` repository secret.
 
 ## Scripts
 
-Here are the available npm scripts:
+| Script                                                  | Description                      |
+| ------------------------------------------------------- | -------------------------------- |
+| `npm run dev`                                           | API with reload                  |
+| `npm run build` / `npm start`                           | Compile to `dist` and run        |
+| `npm run test` / `npm run test:commit`                  | Vitest (watch / once)            |
+| `npm run lint` / `npm run format` / `npm run typecheck` | Code quality                     |
+| `npm run mcp:stdio` / `npm run mcp:stdio:prod`          | MCP over stdio (ts / compiled)   |
+| `npm run mcp:token`                                     | Print a JWT for an existing user |
+| `npm run mcp:inspect`                                   | Open the MCP Inspector           |
 
-| Script            | Description                                           |
-|-------------------|-------------------------------------------------------|
-| `npm run start`   | Starts the application.                               |
-| `npm run dev`     | Starts the app in development mode with hot reload.   |
-| `npm run clean`   | Cleans the `dist` directory.                          |
-| `npm run build`   | Compiles TypeScript to JavaScript.                    |
-| `npm run test`    | Runs tests using Vitest.                              |
-| `npm run lint`    | Runs ESLint to check for coding standard violations.  |
-| `npm run format`  | Formats code using Prettier.                          |
+## Tech
 
----
-
-## Usage
-
-### Starting the Application
-
-Run the development server:
-
-```bash
-npm run dev
-```
-
-The server will start on [http://localhost:3333](http://localhost:3333).
-
-### API Endpoints
-
-#### Register a User
-
-- **POST** `/auth/register`
-- **Body**:
-  ```json
-  {
-    "name": "John Doe",
-    "username": "johndoe",
-    "email": "john@example.com",
-    "password": "password123",
-    "passwordConfirmation": "password123"
-  }
-  ```
-- **Response**:
-  ```json
-  {
-    "id": "uuid",
-    "name": "John Doe",
-    "username": "johndoe",
-    "email": "john@example.com"
-  }
-  ```
-
----
-
-## Testing
-
-Run the unit tests:
-
-```bash
-npm run test
-```
-
-### Key Testing Tools:
-- **Vitest**: For unit and integration testing.
-- **Faker.js**: For generating mock data in tests.
-
----
-
-## Contributing
-
-We welcome contributions to improve this project. Please follow the steps below:
-
-1. Fork this repository.
-2. Create a feature branch: `git checkout -b feature-name`.
-3. Commit your changes using [Conventional Commits](https://www.conventionalcommits.org/).
-4. Push to your fork and submit a pull request.
-
----
+TypeScript · Express · TypeORM · PostgreSQL · Zod · Model Context Protocol SDK · Vitest · Supertest · Docker · ESLint/Prettier · Husky/commitlint
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
-
----
-
-Feel free to explore and contribute to **Over-Engineered CRUD**! 🎉
+MIT

@@ -1,4 +1,4 @@
-import { RegisterUserUsecaseImpl } from '@/application/usecases/register-user-usecase-impl'
+import { RegisterUserUsecaseImpl } from '@/application/usecases/auth/register-user-usecase-impl'
 import { factoryBcrypt } from '@/main/factories/cryptography/factory-bcrypt'
 import { factoryJwt } from '@/main/factories/cryptography/factory-jwt'
 import { factoryUserRepository } from '@/main/factories/repositories/factory-user-repository'
