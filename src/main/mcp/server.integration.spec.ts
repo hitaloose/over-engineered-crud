@@ -72,4 +72,35 @@ describe('MCP server (integration)', () => {
 
     expect(result.isError).toBe(true)
   })
+
+  it('should declare honest tool annotations', async () => {
+    const { tools } = await client.listTools()
+    const byName = Object.fromEntries(tools.map((tool) => [tool.name, tool.annotations]))
+
+    for (const name of ['whoami', 'list_tasks', 'get_task']) {
+      expect(byName[name]?.readOnlyHint).toBe(true)
+    }
+    expect(byName.delete_task?.destructiveHint).toBe(true)
+    expect(byName.create_task?.readOnlyHint).toBe(false)
+  })
+
+  it('should return tool errors (not protocol errors) when unauthenticated', async () => {
+    const anonymous = new Client({ name: 'anonymous', version: '1.0.0' })
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair()
+    await createMcpServer({ resolveAuth: () => undefined }).connect(serverTransport)
+    await anonymous.connect(clientTransport)
+
+    const result = (await anonymous.callTool({ name: 'list_tasks', arguments: {} })) as ToolResult
+
+    expect(result).toMatchObject({ isError: true, structuredContent: { message: 'authentication required' } })
+    await anonymous.close()
+  })
+
+  it('should apply schema defaults and validation before reaching the controller', async () => {
+    const listed = await callTool('list_tasks')
+    expect(listed.structuredContent).toMatchObject({ page: 1, perPage: 20 })
+
+    const invalid = await callTool('list_tasks', { perPage: 1000 })
+    expect(invalid.isError).toBe(true)
+  })
 })

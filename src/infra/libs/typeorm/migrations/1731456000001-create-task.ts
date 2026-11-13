@@ -1,6 +1,6 @@
 import { MigrationInterface, QueryRunner, Table, TableForeignKey, TableIndex } from 'typeorm'
 
-import { dialect } from '@/infra/libs/typeorm/migrations/helpers'
+import { constraintNames, dialect } from '@/infra/libs/typeorm/migrations/helpers'
 
 export class CreateTask1731456000001 implements MigrationInterface {
   async up(queryRunner: QueryRunner): Promise<void> {
@@ -22,11 +22,17 @@ export class CreateTask1731456000001 implements MigrationInterface {
       })
     )
 
-    await queryRunner.createIndex('task', new TableIndex({ name: 'IDX_task_userId', columnNames: ['userId'] }))
+    await queryRunner.createIndex('task', new TableIndex({ name: constraintNames.taskUserIdIndex, columnNames: ['userId'] }))
 
     await queryRunner.createForeignKey(
       'task',
-      new TableForeignKey({ columnNames: ['userId'], referencedTableName: 'user', referencedColumnNames: ['id'], onDelete: 'CASCADE' })
+      new TableForeignKey({
+        name: constraintNames.taskUserIdForeignKey,
+        columnNames: ['userId'],
+        referencedTableName: 'user',
+        referencedColumnNames: ['id'],
+        onDelete: 'CASCADE',
+      })
     )
   }
 

@@ -41,4 +41,17 @@ describe('AuthMiddleware', () => {
     expect(spy).toHaveBeenLastCalledWith({ token: 'good-token' })
     expect(result).toEqual({ success: true, auth: { userId } })
   })
+
+  it('should accept a case-insensitive scheme', async () => {
+    const { sut } = makeSut()
+
+    expect(await sut.handle({ authorization: 'bearer token' })).toMatchObject({ success: true })
+  })
+
+  it('should rethrow unexpected errors instead of hiding them as 401', async () => {
+    const { sut, mockedAuthenticateUsecase } = makeSut()
+    vitest.spyOn(mockedAuthenticateUsecase, 'run').mockRejectedValueOnce(new Error('db down'))
+
+    await expect(sut.handle({ authorization: 'Bearer token' })).rejects.toThrow('db down')
+  })
 })

@@ -5,6 +5,7 @@ Auth + Tasks CRUD in TypeScript built with Clean Architecture. The same controll
 ## Commands
 
 - `npm run test:commit` — all tests once (unit + integration on in-memory SQLite). Run before saying work is done.
+- `npm run test:coverage` — same, with coverage thresholds (95% lines / 85% branches) enforced in CI
 - `npm run typecheck` / `npm run lint` / `npm run format` (eslint --fix)
 - `npm run dev` — API with reload (needs Postgres: `docker compose up app_db -d` and a `.env` from `.env.example`)
 - `npm run mcp:stdio` — MCP over stdio (needs `MCP_ACCESS_TOKEN`; get one with `npm run mcp:token -- --email <e> --password <p>`)
@@ -27,7 +28,9 @@ Imports only point inward: `main → presentation → application → domain`, w
 - Controllers validate `requestInput(request)` (query + body + params, params win), then spread `requireAuth(request)` **last** so input can never override `userId`.
 - Errors: throw `DomainError` (422), `NotFoundError` (404) or `UnauthorizedError` (401) from usecases; the decorator maps them. Unknown errors become a generic 500.
 - Never return `User` directly; map with `toPublicUser`.
-- Tests: vitest + faker, `makeSut()` factory, mocks live in `<layer>/mocks`. Integration specs are `*.integration.spec.ts`.
+- Tests: vitest + faker, `makeSut()` factory, mocks live in `<layer>/mocks`. Integration specs are `*.integration.spec.ts` and use in-memory SQLite.
+- Any route or tool touching tasks needs a cross-user case in `src/main/http/authorization.integration.spec.ts`.
+- `migrations.integration.spec.ts` fails if entities and migrations drift apart; share constraint names through `constraintNames` in `migrations/helpers.ts`.
 - TypeORM columns need an explicit `type` (vitest does not emit decorator metadata). Schema changes need a new migration that works on Postgres and SQLite (see `migrations/helpers.ts`) and must be registered in `infra/libs/typeorm/config.ts`.
 - Commits follow Conventional Commits (commitlint). The pre-commit hook runs the test suite.
 

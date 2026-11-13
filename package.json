@@ -19,7 +19,8 @@
     "mcp:stdio": "node -r ts-node/register/transpile-only src/main/mcp/stdio.ts",
     "mcp:stdio:prod": "node dist/main/mcp/stdio.js",
     "mcp:token": "node -r ts-node/register/transpile-only src/main/mcp/token.ts",
-    "mcp:inspect": "npx @modelcontextprotocol/inspector npm run --silent mcp:stdio"
+    "mcp:inspect": "npx @modelcontextprotocol/inspector npm run --silent mcp:stdio",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
@@ -49,6 +50,7 @@
     "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^8.18.0",
     "@typescript-eslint/parser": "^8.18.0",
+    "@vitest/coverage-v8": "^2.1.8",
     "better-sqlite3": "^12.4.1",
     "eslint": "^9.16.0",
     "eslint-config-prettier": "^9.1.0",
